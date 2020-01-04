@@ -1,0 +1,213 @@
+#include <stdio.h>
+#include <math.h>
+#include<time.h>
+#include <iostream>
+#include <vector>
+#include <GL/glut.h>
+using namespace std;
+
+  
+// window size 
+#define maxWD 640 
+#define maxHT 480 
+  
+// rotation speed 
+#define thetaSpeed 0.05 
+  
+// this creates delay between two actions 
+void delay(unsigned int mseconds) 
+{ 
+    clock_t goal = mseconds + clock(); 
+    while (goal > clock()) 
+        ; 
+} 
+  
+// this is a basic init for the glut window 
+void myInit(void) 
+{ 
+    glClearColor(1.0, 1.0, 1.0, 0.0); 
+    glMatrixMode(GL_PROJECTION); 
+    glLoadIdentity(); 
+    gluOrtho2D(0.0, maxWD, 0.0, maxHT); 
+    glClear(GL_COLOR_BUFFER_BIT); 
+    glFlush(); 
+} 
+  
+// this function just draws a point 
+void drawPoint(int x, int y) 
+{ 
+    glPointSize(7.0); 
+    glColor3f(1,0,0); 
+    glBegin(GL_POINTS); 
+    glVertex2i(x, y); 
+    glEnd(); 
+} 
+  
+void rotateAroundPt(int px, int py, int cx, int cy) 
+{ 
+    float theta = 0.0; 
+    while (1) { 
+        glClear(GL_COLOR_BUFFER_BIT); 
+        int xf, yf; 
+  
+        // update theta anticlockwise rotation 
+        theta = theta + thetaSpeed; 
+  
+        // check overflow 
+        if (theta >= (2.0 * 3.14159)) 
+            theta = theta - (2.0 * 3.14159); 
+  
+        // actual calculations.. 
+        xf = cx + (int)((float)(px - cx) * cos(theta)) 
+             - ((float)(py - cy) * sin(theta)); 
+        yf = cy + (int)((float)(px - cx) * sin(theta)) 
+             + ((float)(py - cy) * cos(theta)); 
+  
+        // drawing the centre point 
+        drawPoint(cx, cy); 
+  
+        // drawing the rotating point 
+        drawPoint(xf, yf); 
+        glFlush(); 
+        // creating a delay 
+        // so that the point can be noticed 
+        delay(10); 
+    } 
+} 
+  
+// this function will translate the point 
+void translatePoint(int px, int py, int tx, int ty) 
+{ 
+    
+        glClear(GL_COLOR_BUFFER_BIT); 
+ 
+        drawPoint(px, py); // drawing the point 
+		drawPoint(tx,ty);
+        glFlush(); 
+
+} 
+  
+// this function draws 
+void scalePoint(void) 
+{ 
+	glClear(GL_COLOR_BUFFER_BIT);
+glColor3f(1,0,0);
+glBegin(GL_TRIANGLES);
+
+
+glVertex2i(0,0);
+glVertex2i(50,100);
+glVertex2i(100,0);
+//glScalef(1,1.0,0);
+glScalef(3, 3, 3);
+
+glClear(GL_COLOR_BUFFER_BIT);
+glBegin(GL_TRIANGLES);
+glVertex2i(0,200);
+glVertex2i(70,300);
+glVertex2i(150,200);
+
+glEnd();
+glFlush();
+
+    
+} 
+void shearing(void){
+	
+    glColor3f(1,0,0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0,      // left
+        800,  // right
+        800, // bottom
+        0,      // top
+        0,      // zNear
+        1       // zFar
+        );
+glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_QUADS);
+    glVertex2f(20, 20);
+    glVertex2f(20, 70);
+    glVertex2f(70, 70);
+    glVertex2f(70, 20);
+    glEnd();
+
+    glScalef(0.86,0.86,0.86);
+    glTranslatef(200,0,0);
+    glRotatef(30, 0, 0,1);
+
+    glBegin(GL_QUADS);
+    glVertex2f(20, 20);
+    glVertex2f(20, 70);
+    glVertex2f(70, 70);
+    glVertex2f(70, 20);
+    glEnd();
+
+    glFlush();
+
+}
+void reflection(void) 
+{ 
+   glClear(GL_COLOR_BUFFER_BIT);
+glColor3f(1,0,0);
+
+glScalef(1,1.0,0);
+//glScalef(1, -1, 0);
+
+glClear(GL_COLOR_BUFFER_BIT);
+glBegin(GL_TRIANGLES);
+glVertex2i(120, 200);
+glVertex2i(240,200);
+glVertex2i(180,400);
+glVertex2i(120, 190);
+glVertex2i(240,190);
+glVertex2i(180,-1);
+glEnd();
+glFlush();
+
+    
+} 
+  
+// Actual display function 
+void myDisplay(void) 
+{ 
+    int opt; 
+    printf("\nEnter\n\t<1> for translation"
+           "\n\t<2> for rotation"
+           "\n\t<3> for scaling\n\t:"
+		   "\n\t<4> for reflection"
+		   "\n\t<5> for shearing"); 
+    scanf("%d", &opt); 
+    printf("\nGo to the window..."); 
+    switch (opt) { 
+    case 1: 
+        translatePoint(100, 200, 1, 5); 
+        break; 
+    case 2: 
+        rotateAroundPt(200, 200, maxWD/2 , maxHT/2 ); 
+        // point will circle around 
+        // the centre of the window 
+        break; 
+    case 3: 
+        scalePoint(); 
+        break; 
+	case 4:
+		reflection();
+		break;
+	case 5:
+		shearing();
+		break;
+    } 
+} 
+  
+void main(int argc, char** argv) 
+{ 
+    glutInit(&argc, argv); 
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); 
+    glutInitWindowSize(maxWD, maxHT); 
+    glutInitWindowPosition(100, 150); 
+    glutCreateWindow("Transforming point"); 
+    glutDisplayFunc(myDisplay); 
+    myInit(); 
+    glutMainLoop(); 
+} 
